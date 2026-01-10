@@ -25,6 +25,7 @@ avg_diff = np.sum(diff_2)/n
 
 iterations = np.arange(n)
 
+# sensitivity to initial conditions 
 plt.scatter(iterations, diff_2, color='blue', s=5)
 plt.plot(iterations, diff_2, color='gray', alpha=0.5, linewidth=0.2)
 plt.xlabel('n')
