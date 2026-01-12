@@ -37,7 +37,7 @@ def backward_euler(x0, v0, length, dt, k, m, g):
 
     return backward
 
-def trapezoidal(x0, v0, length, dt, k, m, g):
+def trapezoidal_first(x0, v0, length, dt, k, m, g):
 
     forward = np.empty([length, 2]) 
     forward[0] = np.array([x0, v0]) 
@@ -57,7 +57,51 @@ def trapezoidal(x0, v0, length, dt, k, m, g):
         ])
                     
     return average
+
+def trapezoidal(x0, v0, length, dt, k, m, g):
+    trajectory = np.empty([length, 2])
+    trajectory[0] = np.array([x0, v0])
+
+    def slope(state):
+        x, v = state
+        return np.array([v, (-k/m)*x + g])
     
+    for n in range(1, length):
+        state = trajectory[n-1]
+
+        forward = slope(state)
+        backward = slope(state + dt*forward)
+
+        trajectory[n] = state + dt/2 * (forward + backward)
+
+    return trajectory
+
+
+def RK4(x0, v0, length, dt, k, m, g):
+    trajectory = np.empty([length, 2])
+    trajectory[0] = np.array([x0, v0])
+
+    def slope(state):
+        x, v = state    # a coordinate/point
+        derivative_vec = np.array([v, (-k/m) * x + g]) 
+        return derivative_vec # a vector/derivate at that point
+        
+    for n in range(1, length):
+        state = trajectory[n-1]
+
+        k1 = slope(state)   # slope/derivative/vector at the current point
+        k2 = slope(state + dt/2 * k1)  # derivative at the point k1 brings us to / tip of the k1 vec (not realy because it's scaled)
+        k3 = slope(state + dt/2 * k2)  # derivative at the point k2 brings us to (from the same state!)
+        k4 = slope(state + dt * k3)    # derivative at the point k3 brings us to (again from the same state!)
+
+        trajectory[n] = state + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
+
+    return trajectory
+
+
+runge_kutta = RK4(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
+
+
 # trying the implicit way
 def implicit_euler(x0, v0, length, dt, k, m, g):
     trajectory = np.empty([length, 2])
@@ -77,18 +121,20 @@ def implicit_euler(x0, v0, length, dt, k, m, g):
 
     return trajectory
 
-trajectory = forward_euler(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
-print(trajectory[:6])
+# trajectory = forward_euler(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
+# print(trajectory[:6])
 
-trajectory_backward = backward_euler(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
-print(trajectory_backward[:6])
+# trajectory_backward = backward_euler(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
+# print(trajectory_backward[:6])
 
-trapezoid = trapezoidal(x0=-1, v0=-2, length=500, dt=0.01, k=2, m=0.5, g=0)
+trapezoid = trapezoidal(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=9)
 print(trapezoid[:6])
 
-plt.plot(trajectory_backward[:,0], trajectory_backward[:,1], color='blue', label='backward')
-plt.plot(trajectory[:,0], trajectory[:,1], color='red', label='forward')
+# plt.plot(trajectory_backward[:,0], trajectory_backward[:,1], color='blue', label='backward')
+# plt.plot(trajectory[:,0], trajectory[:,1], color='red', label='forward')
+
 plt.plot(trapezoid[:,0], trapezoid[:,1], color='green', label='trapezoid')
+# plt.plot(runge_kutta[:,0], runge_kutta[:,1], color='orange', label='RK4')
 plt.title('SHO euler solvers')
 plt.legend()
 plt.xlabel('x')
