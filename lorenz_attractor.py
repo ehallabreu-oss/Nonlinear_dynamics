@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 def lorenz_solver_rk4(x0, y0, z0, a, b, c, length, dt):
     trajectory = np.empty([length, 3])
@@ -23,12 +24,19 @@ def lorenz_solver_rk4(x0, y0, z0, a, b, c, length, dt):
     return trajectory
 
 lorenz = lorenz_solver_rk4(x0=1, y0=1, z0=1, a=10, b=28, c=8/3, length=50000, dt=0.01)
+
 x, y, z = lorenz[:,0], lorenz[:,1], lorenz[:,2] 
 
-ax = plt.figure().add_subplot(projection='3d')
+# rgb = rgb = np.column_stack([
+#     (x - x.min()) / (x.max() - x.min()),
+#     (y - y.min()) / (y.max() - y.min()),
+#     (z - z.min()) / (z.max() - z.min())
+# ])
 
-ax.plot(x, y, z, lw=0.09)
+plt.style.use('dark_background')
+ax = plt.figure(figsize=(8,8)).add_subplot(projection='3d')
 
+ax.plot(x,y,z, color='white', lw=0.5)
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
