@@ -98,10 +98,6 @@ def RK4(x0, v0, length, dt, k, m, g):
 
     return trajectory
 
-
-runge_kutta = RK4(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
-
-
 # trying the implicit way
 def implicit_euler(x0, v0, length, dt, k, m, g):
     trajectory = np.empty([length, 2])
@@ -121,20 +117,25 @@ def implicit_euler(x0, v0, length, dt, k, m, g):
 
     return trajectory
 
-# trajectory = forward_euler(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
-# print(trajectory[:6])
+# params
+x0 = -5
+v0 = 0
+spring_force = 10
+mass = 7
+gravity = 0
 
-# trajectory_backward = backward_euler(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=0)
-# print(trajectory_backward[:6])
+length = 200
+dt = 0.1
 
-trapezoid = trapezoidal(x0=-1, v0=-2, length=50, dt=0.1, k=2, m=0.5, g=9)
-print(trapezoid[:6])
+trajectory = forward_euler(x0, v0, length, dt, spring_force, mass, gravity)
+trajectory_backward = backward_euler(x0, v0, length, dt, spring_force, mass, gravity)
+trapezoid = trapezoidal(x0, v0, length, dt, spring_force, mass, gravity)
+runge_kutta = RK4(x0, v0, length, dt, spring_force, mass, gravity)
 
-# plt.plot(trajectory_backward[:,0], trajectory_backward[:,1], color='blue', label='backward')
 # plt.plot(trajectory[:,0], trajectory[:,1], color='red', label='forward')
-
+plt.plot(trajectory_backward[:,0], trajectory_backward[:,1], color='blue', label='backward')
 plt.plot(trapezoid[:,0], trapezoid[:,1], color='green', label='trapezoid')
-# plt.plot(runge_kutta[:,0], runge_kutta[:,1], color='orange', label='RK4')
+plt.plot(runge_kutta[:,0], runge_kutta[:,1], color='orange', label='RK4')
 plt.title('SHO euler solvers')
 plt.legend()
 plt.xlabel('x')
