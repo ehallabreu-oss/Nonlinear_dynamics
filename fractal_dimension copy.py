@@ -1,44 +1,37 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# amplitude = np.loadtxt('amplitude.dat')
-
-# def delay_coordinate(time_series, delay, dim):
-#     embedding = np.empty([dim, len(time_series) - delay*(dim-1)])
-
-#     for n in range(dim):
-#         if n == 0:
-#             embedding[n] = time_series[delay * (dim-1):]
-#         else:
-#             embedding[n] = time_series[delay * (dim-1-n) : -(delay * n)]
-
-#     return embedding
-
-
 # load lorenz attarctor data
-lorenz = np.genfromtxt('CapDimData.dat', dtype=float, delimiter=',') # (14000, 3)
+lorenz_full = np.genfromtxt('CapDimData.dat', dtype=float, delimiter=',') # (14000, 3)
+lorenz = lorenz_full
 # xz projection
-X, Z = lorenz[:,0], lorenz[:,2]
-coords = np.stack([X, Z])
+X, Y, Z = lorenz[:,0], lorenz[:,1], lorenz[:,2]
+coords = np.stack([X, Y, Z])
 
 def box_counter(coords, epsilon):
     
     hindices = np.arange(np.min(X), np.max(X)+epsilon, epsilon) 
-    vindices = np.arange(np.min(Z), np.max(Z)+epsilon, epsilon) 
+    vindices = np.arange(np.min(Y), np.max(Y)+epsilon, epsilon) 
+    dindices = np.arange(np.min(Z), np.max(Z)+epsilon, epsilon) 
+
     
-    grid = np.zeros([len(vindices), len(hindices)])
+    grid = np.zeros([len(vindices), len(hindices), len(dindices)])
 
     for n in range(coords.shape[1]):
         x = coords[0,n]
-        z = coords[1,n]
-        i = int(np.ceil((z - np.min(Z)) / epsilon))
+        y = coords[1,n]
+        z = coords[2,n]
+        
+        i = int(np.ceil((y - np.min(Y)) / epsilon))
         j = int(np.ceil((x - np.min(X)) / epsilon))
-        grid[i,j] = 1
+        k = int(np.ceil((z - np.min(Z)) / epsilon))
+
+        grid[i,j,k] = 1
 
     return grid
 
-size = 40
-epsilon_range = np.linspace(0.5, 1, size)
+size = 20
+epsilon_range = np.linspace(0.4, 1, size)
 box_number = np.empty(size)
 
 for n in range(size):
