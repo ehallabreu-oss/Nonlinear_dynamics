@@ -118,7 +118,7 @@ def implicit_euler(x0, v0, length, dt, k, m, g):
     return trajectory
 
 # params
-x0 = -5
+x0 = 5
 v0 = 0
 spring_force = 10
 mass = 7
@@ -132,7 +132,7 @@ trajectory_backward = backward_euler(x0, v0, length, dt, spring_force, mass, gra
 trapezoid = trapezoidal(x0, v0, length, dt, spring_force, mass, gravity)
 runge_kutta = RK4(x0, v0, length, dt, spring_force, mass, gravity)
 
-# plt.plot(trajectory[:,0], trajectory[:,1], color='red', label='forward')
+#plt.plot(trajectory[:,0], trajectory[:,1], color='red', label='forward')
 plt.plot(trajectory_backward[:,0], trajectory_backward[:,1], color='blue', label='backward')
 plt.plot(trapezoid[:,0], trapezoid[:,1], color='green', label='trapezoid')
 plt.plot(runge_kutta[:,0], runge_kutta[:,1], color='orange', label='RK4')

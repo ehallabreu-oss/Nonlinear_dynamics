@@ -1,20 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# amplitude = np.loadtxt('amplitude.dat')
-
-# def delay_coordinate(time_series, delay, dim):
-#     embedding = np.empty([dim, len(time_series) - delay*(dim-1)])
-
-#     for n in range(dim):
-#         if n == 0:
-#             embedding[n] = time_series[delay * (dim-1):]
-#         else:
-#             embedding[n] = time_series[delay * (dim-1-n) : -(delay * n)]
-
-#     return embedding
-
-
 # load lorenz attarctor data
 lorenz = np.genfromtxt('CapDimData.dat', dtype=float, delimiter=',') # (14000, 3)
 # xz projection
