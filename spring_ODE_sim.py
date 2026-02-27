@@ -20,6 +20,14 @@ def y_math_to_screen(y, height, ymin, ymax):
     len = ymax - ymin
     return int(height - ((y + len/2) / len) * height)
 
+def x_time_to_screen(t_current, height, y0, t_min, t_max):
+    bottom_panel = height - y0
+    return height - (t_current - t_min)/(t_max - t_min) * bottom_panel 
+        
+def v_time_to_screen(t_current, width, x0, t_min, t_max):
+    right_panel = width - x0
+    return (t_current - t_min)/(t_max - t_min) * right_panel
+
 # x'' = ax' + bx + c 
 # x' = v
 # v' = av + bx + c
@@ -59,6 +67,14 @@ def main():
     xmin, xmax = -50, 50
     ymin, ymax = -50, 50
 
+    # intialising trajectory to draw later
+    trajectory = []
+    
+    # time domain
+    t_current = 0.0
+    time_window = 10
+    time_history = []
+
     # Simulation params
     x = 0.0
     v = 0.0
@@ -83,7 +99,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = event.pos
                 x = x_screen_to_math(mouse_x, width, xmin, xmax)
-                v = y_screen_to_math(mouse_y, height, ymin, ymax)
+                v = y_screen_to_math(mouse_y, height, ymin, ymax)      
 
         # ---update----
         
@@ -91,36 +107,51 @@ def main():
         a = a_slider.getValue()
         b = b_slider.getValue()
         c = c_slider.getValue()
-
-        # dot
+    
+        # dot and trace
         if running:  
             x, v = RK4_update(x, v, dt, a, b, c)
+        else:
+            trajectory = []
+            time_history = []
+            
+        screen_x = x_math_to_screen(x, width, xmin, xmax)
+        screen_v = y_math_to_screen(v, height, ymin, ymax)
+
+        y0 = y_math_to_screen(0, height, ymin, ymax)
+        x0 = x_math_to_screen(0, width, xmin, xmax)
+        
+        trajectory.append((screen_x, screen_v))
+        
+        # time domain
+        t_current += dt
+        time_history.append((x, v, t_current))
+
+        t_min = t_current - time_window
+        t_max = t_min + time_window
+
+        x_time_screen = []
+        v_time_screen = []
+        for x, v, t in time_history:
+            x_screen = x_math_to_screen(x, width, xmin, xmax)
+            v_screen = y_math_to_screen(v, height, ymin, ymax)
+            
+            t_screen_x = x_time_to_screen(t, height, y0, t_min, t_max) 
+            t_screen_v = v_time_to_screen(t, width, x0, t_min, t_max)
+            
+            x_time_screen.append((x_screen, t_screen_x))  
+            v_time_screen.append((t_screen_v, v_screen))     
 
         # reset if values explode  
         if not isinstance(x, (int, float)) or x > np.exp(10) or not isinstance(v, (int, float)) or v > np.exp(10):
             x = 0.0
             v = 0.0
-            running = False
-            screen_x = x_math_to_screen(x, width, xmin, xmax)
-            screen_v = y_math_to_screen(v, height, ymin, ymax)   
+            running = False 
 
         # ----draw-----
         screen.fill((30, 30, 30))
 
-        # x and y axis
-        y0 = y_math_to_screen(0, height, ymin, ymax)
-        x0 = x_math_to_screen(0, width, xmin, xmax)
-        pygame.draw.line(screen, (200,200,200), (0, y0) , (width, y0), 2)
-        pygame.draw.line(screen, (200,200,200), (x0, height) , (x0, 0), 2)
-
-        # moving dot
-        screen_x = x_math_to_screen(x, width, xmin, xmax)
-        screen_v = y_math_to_screen(v, height, ymin, ymax)
-        pygame.draw.circle(screen, (255, 100, 100), (screen_x, screen_v), 8)
-
         # vector field
-        
-        # aesthetics
         res = 26
         scale = 0.1    # this is just the size of dt
 
@@ -138,6 +169,28 @@ def main():
                 vs_end = y_math_to_screen(v_end, height, ymin, ymax)
 
                 pygame.draw.line(screen, (50, 50, 200), (xs_start, vs_start), (xs_end, vs_end), 2)
+
+        # x and y axis
+        pygame.draw.line(screen, (200,200,200), (0, y0) , (width, y0), 2)
+        pygame.draw.line(screen, (200,200,200), (x0, height) , (x0, 0), 2)
+
+        # moving dot
+        pygame.draw.line(screen, (150, 150, 150), (screen_x, screen_v), (screen_x, y0), 2)
+        pygame.draw.line(screen, (150, 150, 150), (screen_x, screen_v), (x0, screen_v), 2)
+        pygame.draw.circle(screen, (255, 100, 100), (screen_x, screen_v), 8)
+
+        # trace
+        if len(trajectory) > 1:
+            pygame.draw.lines(screen, (255, 100, 100), False, trajectory, 2)
+
+        # x time domain
+        if len(x_time_screen) > 1:
+            pygame.draw.lines(screen, (180, 180, 180), False, x_time_screen, 2)
+
+        # v time domain
+        if len(v_time_screen) > 1:
+            pygame.draw.lines(screen, (180, 180, 180), False, v_time_screen, 2)
+
                 
         pygame_widgets.update(events)
         pygame.display.flip()
